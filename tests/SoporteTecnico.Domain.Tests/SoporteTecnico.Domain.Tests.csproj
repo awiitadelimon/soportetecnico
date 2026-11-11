@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SoporteTecnico.Domain\SoporteTecnico.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
