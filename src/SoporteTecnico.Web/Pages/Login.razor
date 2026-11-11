@@ -1,0 +1,83 @@
+@page "/login"
+@layout LoginLayout
+@inherits Tf15Page
+
+<PageTitle>Iniciar sesión · TF15</PageTitle>
+
+<section class="login-card" aria-labelledby="titulo-acceso">
+    <p class="eyebrow">Acceso al sistema</p>
+    <h1 id="titulo-acceso">Iniciar sesión</h1>
+    @if (Opciones.UseMockData)
+    {
+        <p class="lead">Use una cuenta de prueba para recorrer el proyecto con datos simulados.</p>
+    }
+    else
+    {
+        <p class="lead">Use una cuenta creada en la API del equipo.</p>
+    }
+
+    @if (SesionExpirada && Error is null)
+    {
+        <p class="notice" role="status">Sesión expirada. Inicie sesión nuevamente.</p>
+    }
+    <Mensajes Error="@Error" Ocupado="@Ocupado" />
+
+    <form class="login-form" @onsubmit="Entrar" @onsubmit:preventDefault>
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" required autocomplete="username" @bind="correo" />
+
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" required autocomplete="current-password" @bind="clave" />
+
+        <button type="submit" disabled="@Ocupado">Entrar</button>
+    </form>
+
+    @if (Opciones.UseMockData)
+    {
+        <section class="demo-accounts" aria-labelledby="titulo-cuentas">
+            <h2 id="titulo-cuentas">Cuentas de demostración</h2>
+            <p>Contraseña para ambas cuentas <code>@MockTf15Service.ClaveDemostracion</code></p>
+            <div class="demo-account">
+                <div><strong>Administrador</strong><span>@MockTf15Service.CorreoAdministrador</span></div>
+                <button class="secondary" type="button" disabled="@Ocupado" @onclick="() => Completar(MockTf15Service.CorreoAdministrador)">Usar Administrador</button>
+            </div>
+            <div class="demo-account">
+                <div><strong>Gestor</strong><span>@MockTf15Service.CorreoGestor</span></div>
+                <button class="secondary" type="button" disabled="@Ocupado" @onclick="() => Completar(MockTf15Service.CorreoGestor)">Usar Gestor</button>
+            </div>
+        </section>
+    }
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "expirada")]
+    public bool SesionExpirada { get; set; }
+
+    private string correo = "";
+    private string clave = "";
+
+    protected override void OnInitialized()
+    {
+        if (Acceso)
+            Navegacion.NavigateTo("", replace: true);
+    }
+
+    private Task Entrar() => EjecutarAsync(async () =>
+    {
+        try
+        {
+            await Servicio.IniciarSesionAsync(new LoginInput(correo, clave));
+            Navegacion.NavigateTo("", replace: true);
+        }
+        finally
+        {
+            clave = "";
+        }
+    });
+
+    private void Completar(string cuenta)
+    {
+        correo = cuenta;
+        clave = MockTf15Service.ClaveDemostracion;
+    }
+}

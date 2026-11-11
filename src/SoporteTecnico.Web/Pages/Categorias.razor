@@ -1,0 +1,100 @@
+@page "/categorias"
+@inherits Tf15Page
+
+<PageTitle>Categorías · TF15</PageTitle>
+<h1>Categorías</h1>
+<p class="lead">Clasifique las incidencias. Los tickets conservan su categoría en el historial.</p>
+<Mensajes Error="@Error" Confirmacion="@Confirmacion" Ocupado="@Ocupado" />
+
+@if (Acceso)
+{
+    @if (!Admin)
+    {
+        <p class="notice">Con el rol Gestor puede consultar las categorías. El Administrador realiza el mantenimiento.</p>
+    }
+
+    <section class="card scroll">
+        <h2>Listado y mantenimiento</h2>
+        @if (Admin)
+        {
+            <form @onsubmit="GuardarCategoria" @onsubmit:preventDefault>
+                <label>Nombre de la categoría <input required maxlength="100" @bind="nombreCategoria" /></label>
+                <div class="actions">
+                    <button disabled="@Ocupado">Guardar categoría</button>
+                    @if (categoriaEdicion is not null)
+                    {
+                        <button type="button" class="secondary" @onclick="LimpiarCategoria">Cancelar edición</button>
+                    }
+                </div>
+            </form>
+        }
+        @if (categorias.Length == 0) { <p>Sin categorías.</p> }
+        else
+        {
+            <table>
+                <thead><tr><th scope="col">Categoría</th>@if (Admin) { <th scope="col">Acciones</th> }</tr></thead>
+                <tbody>
+                    @foreach (var c in categorias)
+                    {
+                        <tr @key="c.Id">
+                            <td>@c.Nombre</td>
+                            @if (Admin)
+                            {
+                                <td><div class="actions">
+                                    <button type="button" class="secondary" disabled="@Ocupado" @onclick="() => EditarCategoria(c)">Editar categoría</button>
+                                    <button type="button" class="danger" disabled="@Ocupado" @onclick="() => categoriaPorEliminar = c">Eliminar categoría</button>
+                                </div></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        @if (categoriaPorEliminar is { } eliminar)
+        {
+            <p>¿Eliminar la categoría <strong>@eliminar.Nombre</strong>?</p>
+            <div class="actions">
+                <button type="button" class="danger" disabled="@Ocupado" @onclick="() => EliminarCategoria(eliminar.Id)">Confirmar eliminación</button>
+                <button type="button" class="secondary" @onclick="() => categoriaPorEliminar = null">Volver</button>
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private Categoria[] categorias = [];
+    private Categoria? categoriaPorEliminar;
+    private int? categoriaEdicion;
+    private string nombreCategoria = "";
+
+    protected override Task OnInitializedAsync() => Acceso ? EjecutarAsync(Cargar) : Task.CompletedTask;
+    private async Task Cargar() => categorias = await Servicio.CategoriasAsync();
+
+    private void EditarCategoria(Categoria categoria)
+    {
+        categoriaEdicion = categoria.Id;
+        nombreCategoria = categoria.Nombre;
+    }
+
+    private void LimpiarCategoria()
+    {
+        categoriaEdicion = null;
+        nombreCategoria = "";
+    }
+
+    private Task GuardarCategoria() => EjecutarAsync(async () =>
+    {
+        await Servicio.GuardarCategoriaAsync(categoriaEdicion, new CategoriaInput(nombreCategoria));
+        LimpiarCategoria();
+        Confirmar("Categoría guardada.");
+        await Cargar();
+    });
+    private Task EliminarCategoria(int id) => EjecutarAsync(async () =>
+    {
+        await Servicio.EliminarCategoriaAsync(id);
+        categoriaPorEliminar = null;
+        if (categoriaEdicion == id) LimpiarCategoria();
+        Confirmar("Categoría eliminada.");
+        await Cargar();
+    });
+}

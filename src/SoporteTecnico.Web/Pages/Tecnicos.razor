@@ -1,0 +1,119 @@
+@page "/tecnicos"
+@inherits Tf15Page
+
+<PageTitle>Técnicos · TF15</PageTitle>
+<h1>Técnicos</h1>
+<p class="lead">Consulte los técnicos habilitados para atender incidencias.</p>
+
+<Mensajes Error="@Error" Confirmacion="@Confirmacion" Ocupado="@Ocupado" />
+@if (Acceso)
+{
+    @if (!Admin)
+    {
+        <p class="notice">Con el rol Gestor puede consultar los responsables. El Administrador mantiene el directorio.</p>
+    }
+
+    @if (Admin)
+    {
+        <section class="card">
+            <h2>@(editando is null ? "Nuevo técnico" : "Editar técnico")</h2>
+            <form @onsubmit="Guardar" @onsubmit:preventDefault>
+                <div class="fields">
+                    <label>Nombre <input required maxlength="120" @bind="nombre" /></label>
+                    <label>Correo <input type="email" required maxlength="254" @bind="correo" /></label>
+                </div>
+                <label><input type="checkbox" @bind="activo" /> Activo para nuevas asignaciones</label>
+                <div class="actions">
+                    <button disabled="@Ocupado">Guardar técnico</button>
+                    @if (editando is not null)
+                    {
+                        <button type="button" class="secondary" @onclick="Limpiar" disabled="@Ocupado">Cancelar edición</button>
+                    }
+                </div>
+            </form>
+        </section>
+    }
+    <section class="card scroll">
+        <h2>Listado</h2>
+        @if (tecnicos.Length == 0)
+        {
+            <p>Sin técnicos para mostrar.</p>
+        }
+        else
+        {
+            <table>
+                <thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Estado</th>@if (Admin) { <th scope="col">Acciones</th> }</tr></thead>
+                <tbody>
+                    @foreach (var tecnico in tecnicos)
+                    {
+                        <tr @key="tecnico.Id">
+                            <td>@tecnico.Nombre</td><td>@tecnico.Email</td>
+                            <td><span class="tag">@(tecnico.Activo ? "Activo" : "Inactivo")</span></td>
+                            @if (Admin)
+                            {
+                                <td><div class="actions">
+                                    <button type="button" class="secondary" disabled="@Ocupado" @onclick="() => Editar(tecnico)">Editar</button>
+                                    <button type="button" class="danger" disabled="@Ocupado" @onclick="() => eliminar = tecnico">Eliminar</button>
+                                </div></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+    @if (eliminar is { } e)
+    {
+        <section class="card">
+            <p>¿Eliminar a <strong>@e.Nombre</strong>?</p>
+            <div class="actions">
+                <button type="button" class="danger" disabled="@Ocupado" @onclick="() => Eliminar(e.Id)">Confirmar eliminación</button>
+                <button type="button" class="secondary" disabled="@Ocupado" @onclick="() => eliminar = null">Volver</button>
+            </div>
+        </section>
+    }
+}
+
+@code {
+    private Tecnico[] tecnicos = [];
+    private int? editando;
+    private string nombre = "", correo = "";
+    private bool activo = true;
+    private Tecnico? eliminar;
+
+    protected override Task OnInitializedAsync() => Acceso ? EjecutarAsync(Cargar) : Task.CompletedTask;
+    private async Task Cargar() => tecnicos = await Servicio.TecnicosAsync();
+
+    private void Editar(Tecnico tecnico)
+    {
+        editando = tecnico.Id;
+        nombre = tecnico.Nombre;
+        correo = tecnico.Email;
+        activo = tecnico.Activo;
+    }
+
+    private void Limpiar()
+    {
+        editando = null;
+        nombre = correo = "";
+        activo = true;
+    }
+
+    private Task Guardar() => EjecutarAsync(async () =>
+    {
+        await Servicio.GuardarTecnicoAsync(editando, new TecnicoInput(nombre, correo, activo));
+        Limpiar();
+        Confirmar("Técnico guardado.");
+        await Cargar();
+    });
+
+    private Task Eliminar(int id) => EjecutarAsync(async () =>
+    {
+        await Servicio.EliminarTecnicoAsync(id);
+        eliminar = null;
+        if (editando == id)
+            Limpiar();
+        Confirmar("Técnico eliminado.");
+        await Cargar();
+    });
+}

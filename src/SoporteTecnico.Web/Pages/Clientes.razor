@@ -1,0 +1,114 @@
+@page "/clientes"
+@inherits Tf15Page
+
+<PageTitle>Clientes · TF15</PageTitle>
+<h1>Clientes</h1>
+<p class="lead">Consulte los clientes que reportan incidencias.</p>
+
+<Mensajes Error="@Error" Confirmacion="@Confirmacion" Ocupado="@Ocupado" />
+@if (Acceso)
+{
+    @if (!Admin)
+    {
+        <p class="notice">Con el rol Gestor puede consultar los clientes. El Administrador mantiene el directorio.</p>
+    }
+
+    @if (Admin)
+    {
+        <section class="card">
+            <h2>@(editando is null ? "Nuevo cliente" : "Editar cliente")</h2>
+            <form @onsubmit="Guardar" @onsubmit:preventDefault>
+                <div class="fields">
+                    <label>Nombre <input required maxlength="120" @bind="nombre" /></label>
+                    <label>Correo <input type="email" required maxlength="254" @bind="correo" /></label>
+                </div>
+                <div class="actions">
+                    <button disabled="@Ocupado">Guardar cliente</button>
+                    @if (editando is not null)
+                    {
+                        <button type="button" class="secondary" @onclick="Limpiar" disabled="@Ocupado">Cancelar edición</button>
+                    }
+                </div>
+            </form>
+        </section>
+    }
+    <section class="card scroll">
+        <h2>Listado</h2>
+        @if (clientes.Length == 0)
+        {
+            <p>Sin clientes para mostrar.</p>
+        }
+        else
+        {
+            <table>
+                <thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th>@if (Admin) { <th scope="col">Acciones</th> }</tr></thead>
+                <tbody>
+                    @foreach (var cliente in clientes)
+                    {
+                        <tr @key="cliente.Id">
+                            <td>@cliente.Nombre</td><td>@cliente.Email</td>
+                            @if (Admin)
+                            {
+                                <td><div class="actions">
+                                    <button type="button" class="secondary" disabled="@Ocupado" @onclick="() => Editar(cliente)">Editar</button>
+                                    <button type="button" class="danger" disabled="@Ocupado" @onclick="() => eliminar = cliente">Eliminar</button>
+                                </div></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+    @if (eliminar is { } e)
+    {
+        <section class="card">
+            <p>¿Eliminar a <strong>@e.Nombre</strong>?</p>
+            <div class="actions">
+                <button type="button" class="danger" disabled="@Ocupado" @onclick="() => Eliminar(e.Id)">Confirmar eliminación</button>
+                <button type="button" class="secondary" disabled="@Ocupado" @onclick="() => eliminar = null">Volver</button>
+            </div>
+        </section>
+    }
+}
+
+@code {
+    private Cliente[] clientes = [];
+    private int? editando;
+    private string nombre = "", correo = "";
+    private Cliente? eliminar;
+
+    protected override Task OnInitializedAsync() => Acceso ? EjecutarAsync(Cargar) : Task.CompletedTask;
+    private async Task Cargar() => clientes = await Servicio.ClientesAsync();
+
+    private void Editar(Cliente cliente)
+    {
+        editando = cliente.Id;
+        nombre = cliente.Nombre;
+        correo = cliente.Email;
+    }
+
+    private void Limpiar()
+    {
+        editando = null;
+        nombre = correo = "";
+    }
+
+    private Task Guardar() => EjecutarAsync(async () =>
+    {
+        await Servicio.GuardarClienteAsync(editando, new ClienteInput(nombre, correo));
+        Limpiar();
+        Confirmar("Cliente guardado.");
+        await Cargar();
+    });
+
+    private Task Eliminar(int id) => EjecutarAsync(async () =>
+    {
+        await Servicio.EliminarClienteAsync(id);
+        eliminar = null;
+        if (editando == id)
+            Limpiar();
+        Confirmar("Cliente eliminado.");
+        await Cargar();
+    });
+}

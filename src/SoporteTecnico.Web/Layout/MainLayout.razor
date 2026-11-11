@@ -1,0 +1,55 @@
+@inherits LayoutComponentBase
+@inject ITf15Service Servicio
+@inject FrontendOptions Options
+@inject NavigationManager Navegacion
+
+@if (Servicio.SesionActual is { } sesion)
+{
+    <a class="skip-link" href="@(Navegacion.Uri.Split('#')[0] + "#contenido")">Ir al contenido</a>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="">
+                <span class="brand-mark">15</span>
+                <span><strong>Soporte Técnico</strong><small>INF-5130 · TF15</small></span>
+            </a>
+            <nav class="menu" aria-label="Navegación principal">
+                <NavLink href="" Match="NavLinkMatch.All">Inicio</NavLink>
+                <div class="menu-label">Mantenimientos</div>
+                <NavLink href="categorias">Categorías</NavLink>
+                <NavLink href="tecnicos">Técnicos</NavLink>
+                <NavLink href="clientes">Clientes</NavLink>
+                <div class="menu-label">Operaciones</div>
+                <NavLink href="tickets">Tickets</NavLink>
+            </nav>
+        </aside>
+
+        <div class="workspace">
+            <header class="topbar">
+                <span class="mode">@(Options.UseMockData ? "Datos simulados" : "Modo API")</span>
+                <div class="account">
+                    <div class="account-details">
+                        <strong>@sesion.Nombre</strong>
+                        <span>@string.Join(", ", sesion.Roles)</span>
+                    </div>
+                    <button type="button" class="secondary" @onclick="Salir">Cerrar sesión</button>
+                </div>
+            </header>
+            <main class="shell" id="contenido" tabindex="-1">@Body</main>
+            <footer class="shell footer">UASD · Laboratorio de Lenguaje de Programación I</footer>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnParametersSet()
+    {
+        if (Servicio.SesionActual is null)
+            Navegacion.NavigateTo("login", replace: true);
+    }
+
+    private void Salir()
+    {
+        Servicio.CerrarSesion();
+        Navegacion.NavigateTo("login", replace: true);
+    }
+}

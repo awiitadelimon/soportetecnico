@@ -1,0 +1,36 @@
+@page "/"
+@inherits Tf15Page
+
+<PageTitle>Inicio · TF15</PageTitle>
+<p class="eyebrow">Panel principal</p>
+<h1>Soporte Técnico</h1>
+<p class="lead">Registre incidencias y siga su atención desde el reporte hasta el cierre.</p>
+<Mensajes Error="@Error" Ocupado="@Ocupado" />
+
+@if (resumen is { } r)
+{
+    <section class="stats" aria-label="Indicadores del tablero">
+        <section class="card"><strong>@r.Abiertos</strong> Tickets abiertos</section>
+        <section class="card"><strong>@r.Asignados</strong> Tickets asignados</section>
+        <section class="card"><strong>@r.Resueltos</strong> Resueltos por cerrar</section>
+        <section class="card"><strong>@r.Cerrados</strong> Tickets cerrados</section>
+        <section class="card"><strong>@r.TecnicosActivos</strong> Técnicos activos</section>
+    </section>
+}
+
+<section class="dashboard-links" aria-labelledby="modulos">
+    <h2 id="modulos">Módulos</h2>
+    <div class="module-grid">
+        <a class="card" href="tickets"><strong>Tickets</strong><span>Registre incidencias, asignaciones y soluciones.</span></a>
+        <a class="card" href="clientes"><strong>Clientes</strong><span>Consulte quién reportó la incidencia.</span></a>
+        <a class="card" href="tecnicos"><strong>Técnicos</strong><span>Identifique quién está habilitado para atender.</span></a>
+        <a class="card" href="categorias"><strong>Categorías</strong><span>Organice las incidencias por tema.</span></a>
+    </div>
+</section>
+
+@code {
+    private Resumen? resumen;
+
+    protected override Task OnInitializedAsync() =>
+        EjecutarAsync(async () => resumen = await Servicio.ResumenAsync());
+}

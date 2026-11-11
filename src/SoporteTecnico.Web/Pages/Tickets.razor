@@ -1,0 +1,278 @@
+@page "/tickets"
+@inherits Tf15Page
+
+<PageTitle>Tickets · TF15</PageTitle>
+<h1>Tickets</h1>
+<p class="lead">Registre la incidencia y documente quién la atiende, qué se hizo y cuándo se cerró.</p>
+<Mensajes Error="@Error" Confirmacion="@Confirmacion" Ocupado="@Ocupado" />
+
+@if (Gestion)
+{
+    <section class="card">
+        <h2>Nuevo ticket</h2>
+        <form @onsubmit="Crear" @onsubmit:preventDefault>
+            <div class="fields">
+                <label>Cliente
+                    <select required @bind="clienteId">
+                        <option value="">Seleccione</option>
+                        @foreach (var cliente in clientes)
+                        {
+                            <option value="@cliente.Id">@cliente.Nombre</option>
+                        }
+                    </select>
+                </label>
+                <label>Categoría
+                    <select required @bind="categoriaId">
+                        <option value="">Seleccione</option>
+                        @foreach (var categoria in categorias)
+                        {
+                            <option value="@categoria.Id">@categoria.Nombre</option>
+                        }
+                    </select>
+                </label>
+                <label>Prioridad
+                    <select @bind="prioridad">
+                        @foreach (var opcion in Prioridades.Todas)
+                        {
+                            <option value="@opcion">@Prioridades.Etiqueta(opcion)</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <div class="ticket-field">
+                <label>Asunto <input required maxlength="150" @bind="asunto" /></label>
+            </div>
+            <div class="ticket-field">
+                <label>Descripción <textarea required maxlength="1000" @bind="descripcion"></textarea></label>
+            </div>
+            <div class="actions"><button disabled="@(Ocupado || clientes.Length == 0 || categorias.Length == 0)">Crear ticket</button></div>
+        </form>
+    </section>
+}
+
+@if (ticket is { } actual)
+{
+    var datos = actual.Datos;
+    <section class="card" aria-labelledby="detalle">
+        <div class="ticket-heading">
+            <div>
+                <p class="eyebrow">Ficha del ticket</p>
+                <h2 id="detalle" tabindex="-1" @ref="tituloDetalle">#@datos.Id · @datos.Asunto</h2>
+            </div>
+            <span class="tag @ClaseEstado(datos.Estado)">@datos.Estado</span>
+        </div>
+        <dl class="ticket-meta">
+            <div><dt>Cliente</dt><dd>@datos.ClienteNombre</dd></div>
+            <div><dt>Categoría</dt><dd>@datos.CategoriaNombre</dd></div>
+            <div><dt>Prioridad</dt><dd>@Prioridades.Etiqueta(datos.Prioridad)</dd></div>
+            <div><dt>Técnico</dt><dd>@(datos.TecnicoNombre ?? "Sin asignar")</dd></div>
+        </dl>
+        <p class="ticket-text">@actual.Descripcion</p>
+
+        @if (Gestion && datos.Estado is "Abierto" or "Asignado")
+        {
+            <div class="ticket-operations">
+                <form @onsubmit="Asignar" @onsubmit:preventDefault>
+                    <label>Técnico responsable
+                        <select required @bind="tecnicoId">
+                            <option value="">Seleccione</option>
+                            @foreach (var tecnico in tecnicos.Where(t => t.Id != datos.TecnicoId))
+                            {
+                                <option value="@tecnico.Id">@tecnico.Nombre</option>
+                            }
+                        </select>
+                    </label>
+                    <div class="actions"><button disabled="@(Ocupado || !tecnicos.Any(t => t.Id != datos.TecnicoId))">@(datos.Estado == "Abierto" ? "Asignar técnico" : "Reasignar técnico")</button></div>
+                </form>
+
+                <form @onsubmit="Anotar" @onsubmit:preventDefault>
+                    <label>Nota de seguimiento <textarea required maxlength="1000" @bind="nota"></textarea></label>
+                    <div class="actions"><button disabled="@Ocupado">Agregar nota</button></div>
+                </form>
+            </div>
+            @if (datos.Estado == "Asignado")
+            {
+                <form class="ticket-field" @onsubmit="Resolver" @onsubmit:preventDefault>
+                    <label>Solución aplicada <textarea required maxlength="1000" @bind="solucion"></textarea></label>
+                    <div class="actions"><button disabled="@Ocupado">Resolver ticket</button></div>
+                </form>
+            }
+            else
+            {
+                <p class="notice">Asigne un técnico antes de registrar la solución.</p>
+            }
+        }
+
+        @if (Gestion && datos.Estado == "Resuelto")
+        {
+            <p class="notice">Revise la solución registrada en el seguimiento antes de cerrar el ticket.</p>
+            <button type="button" disabled="@Ocupado" @onclick="Cerrar">Cerrar ticket</button>
+        }
+
+        <h3>Seguimiento</h3>
+        <ol class="timeline" aria-label="Historial de seguimiento">
+            @foreach (var evento in actual.Seguimientos)
+            {
+                <li @key="evento.Id">
+                    <strong>@evento.Tipo</strong><span class="event-meta">@Fecha(evento.FechaUtc) · @evento.Autor</span>
+                    <p class="ticket-text">@evento.Detalle</p>
+                </li>
+            }
+        </ol>
+    </section>
+}
+
+<section class="card scroll" aria-labelledby="listado">
+    <h2 id="listado">Tickets registrados</h2>
+    <div class="fields">
+        <label>Filtrar por estado
+            <select @bind="filtroEstado">
+                <option value="">Todos</option>
+                <option value="Abierto">Abierto</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Resuelto">Resuelto</option>
+                <option value="Cerrado">Cerrado</option>
+            </select>
+        </label>
+        <label>Filtrar por prioridad
+            <select @bind="filtroPrioridad">
+                <option value="">Todas</option>
+                @foreach (var opcion in Prioridades.Todas)
+                {
+                    <option value="@opcion">@Prioridades.Etiqueta(opcion)</option>
+                }
+            </select>
+        </label>
+    </div>
+    @if (Visibles.Length == 0)
+    {
+        <p>Sin tickets para mostrar.</p>
+    }
+    else
+    {
+        <table class="ticket-list">
+            <thead><tr>
+                <th scope="col">Ticket</th><th scope="col">Asunto y cliente</th><th scope="col">Prioridad</th>
+                <th scope="col">Estado</th><th scope="col">Técnico</th><th scope="col">Detalle</th>
+            </tr></thead>
+            <tbody>
+                @foreach (var item in Visibles)
+                {
+                    <tr @key="item.Id">
+                        <th scope="row">#@item.Id</th>
+                        <td><strong>@item.Asunto</strong><br />@item.ClienteNombre</td>
+                        <td><span class="tag @(item.Prioridad is "Alta" or "Critica" ? "tag-prioridad" : "")">@Prioridades.Etiqueta(item.Prioridad)</span></td>
+                        <td><span class="tag @ClaseEstado(item.Estado)">@item.Estado</span></td>
+                        <td>@(item.TecnicoNombre ?? "Sin asignar")</td>
+                        <td><button type="button" class="secondary" disabled="@Ocupado" @onclick="() => Abrir(item.Id)">Ver ticket</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private Cliente[] clientes = [];
+    private Categoria[] categorias = [];
+    private Tecnico[] tecnicos = [];
+    private TicketResumen[] tickets = [];
+    private Ticket? ticket;
+    private int? clienteId, categoriaId, tecnicoId;
+    private string asunto = "", descripcion = "", prioridad = "Media", nota = "", solucion = "";
+    private string filtroEstado = "", filtroPrioridad = "";
+    private ElementReference tituloDetalle;
+    private bool enfocarDetalle;
+
+    private TicketResumen[] Visibles => tickets.Where(t =>
+        (filtroEstado.Length == 0 || t.Estado == filtroEstado) &&
+        (filtroPrioridad.Length == 0 || t.Prioridad == filtroPrioridad)).ToArray();
+
+    protected override Task OnInitializedAsync() => EjecutarAsync(async () =>
+    {
+        clientes = await Servicio.ClientesAsync();
+        categorias = await Servicio.CategoriasAsync();
+        tecnicos = (await Servicio.TecnicosAsync()).Where(t => t.Activo).ToArray();
+        tickets = await Servicio.TicketsAsync();
+    });
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!enfocarDetalle)
+            return;
+        enfocarDetalle = false;
+        await tituloDetalle.FocusAsync();
+    }
+
+    private Task Crear() => EjecutarAsync(async () =>
+    {
+        if (clienteId is not int cliente || categoriaId is not int categoria)
+            throw new InvalidOperationException("Seleccione el cliente y la categoría.");
+        Mostrar(await Servicio.CrearTicketAsync(new TicketInput(cliente, categoria, asunto, descripcion, prioridad)));
+        clienteId = categoriaId = null;
+        asunto = descripcion = filtroEstado = filtroPrioridad = "";
+        prioridad = "Media";
+        Confirmar("Ticket creado.");
+    });
+
+    private Task Abrir(int id) => EjecutarAsync(async () => Mostrar(await Servicio.TicketAsync(id)));
+
+    private Task Asignar() => EjecutarAsync(async () =>
+    {
+        if (ticket is not { } actual || tecnicoId is not int tecnico)
+            throw new InvalidOperationException("Seleccione un técnico.");
+        Actualizar(await Servicio.AsignarAsync(actual.Datos.Id, new AsignacionInput(tecnico)));
+        tecnicoId = null;
+        Confirmar("Asignación registrada.");
+    });
+
+    private Task Anotar() => EjecutarAsync(async () =>
+    {
+        if (ticket is not { } actual)
+            return;
+        Actualizar(await Servicio.AnotarAsync(actual.Datos.Id, new NotaInput(nota)));
+        nota = "";
+        Confirmar("Nota registrada.");
+    });
+
+    private Task Resolver() => EjecutarAsync(async () =>
+    {
+        if (ticket is not { } actual)
+            return;
+        Actualizar(await Servicio.ResolverAsync(actual.Datos.Id, new ResolucionInput(solucion)));
+        solucion = "";
+        Confirmar("Ticket resuelto.");
+    });
+
+    private Task Cerrar() => EjecutarAsync(async () =>
+    {
+        if (ticket is not { } actual)
+            return;
+        Actualizar(await Servicio.CerrarAsync(actual.Datos.Id));
+        Confirmar("Ticket cerrado.");
+    });
+
+    private void Mostrar(Ticket actual)
+    {
+        Actualizar(actual);
+        tecnicoId = null;
+        nota = solucion = "";
+        enfocarDetalle = true;
+    }
+
+    private void Actualizar(Ticket actual)
+    {
+        ticket = actual;
+        tickets = tickets.Where(t => t.Id != actual.Datos.Id).Append(actual.Datos).OrderByDescending(t => t.Id).ToArray();
+    }
+
+    private static string ClaseEstado(string estado) => estado switch
+    {
+        "Cerrado" => "tag-cerrado",
+        "Resuelto" => "tag-resuelto",
+        _ => ""
+    };
+
+    private static string Fecha(DateTimeOffset utc) =>
+        TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utc, "America/Santo_Domingo").ToString("dd/MM/yyyy HH:mm");
+}

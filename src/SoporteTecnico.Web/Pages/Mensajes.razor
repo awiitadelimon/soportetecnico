@@ -1,0 +1,18 @@
+@if (Error is not null)
+{
+    <p class="error" role="alert">@Error</p>
+}
+@if (Confirmacion is not null)
+{
+    <p class="success" role="status">@Confirmacion</p>
+}
+@if (Ocupado)
+{
+    <p role="status">Procesando…</p>
+}
+
+@code {
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? Confirmacion { get; set; }
+    [Parameter] public bool Ocupado { get; set; }
+}

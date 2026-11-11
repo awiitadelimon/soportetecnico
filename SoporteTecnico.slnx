@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SoporteTecnico.Api/SoporteTecnico.Api.csproj" />
+    <Project Path="src/SoporteTecnico.Application/SoporteTecnico.Application.csproj" />
+    <Project Path="src/SoporteTecnico.Domain/SoporteTecnico.Domain.csproj" />
+    <Project Path="src/SoporteTecnico.Infrastructure/SoporteTecnico.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/SoporteTecnico.Web/">
+    <Project Path="src/SoporteTecnico.Web/SoporteTecnico.Frontend.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SoporteTecnico.Application.Tests/SoporteTecnico.Application.Tests.csproj" />
+    <Project Path="tests/SoporteTecnico.Domain.Tests/SoporteTecnico.Domain.Tests.csproj" />
+    <Project Path="tests/SoporteTecnico.Infrastructure.Tests/SoporteTecnico.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
