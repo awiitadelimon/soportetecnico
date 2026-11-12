@@ -1,8 +1,7 @@
-namespace SoporteTecnico.Domain.Entities;
+ï»¿namespace SoporteTecnico.Domain.Entities;
 
-/// <summary>
-/// Clasifica el área o tipo de incidencia de un ticket.
-/// </summary>
 public class Categoria
 {
+    public int Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
 }
