@@ -1,8 +1,8 @@
-\# SoporteTecnico.Domain
+# SoporteTecnico.Domain
 
 
 
-\## Propósito
+## Propósito
 
 
 
@@ -14,7 +14,7 @@ Domain no debe depender de las demás capas de la aplicación.
 
 
 
-\## Estructura
+## Estructura
 
 
 
@@ -60,7 +60,7 @@ SoporteTecnico.Domain/
 
 
 
-\## 1. Entities
+## 1. Entities
 
 
 
@@ -84,7 +84,7 @@ Contiene las entidades del sistema. Cada clase representa un elemento del domini
 
 
 
-\## 2. Enums
+## 2. Enums
 
 
 
@@ -104,7 +104,7 @@ Contiene enumeraciones que representan conjuntos limitados de valores permitidos
 
 
 
-\## 3. Exceptions
+## 3. Exceptions
 
 
 
@@ -124,7 +124,7 @@ Posteriormente se podrán agregar excepciones derivadas para situaciones concret
 
 
 
-\## Estado actual
+## Estado actual
 
 
 
@@ -132,17 +132,17 @@ La estructura de carpetas y los archivos iniciales están creados.
 
 
 
-\- Las enumeraciones ya contienen sus valores.
+- Las enumeraciones ya contienen sus valores.
 
-\- Las entidades todavía no tienen propiedades ni métodos.
+- Las entidades todavía no tienen propiedades ni métodos.
 
-\- La excepción base todavía no tiene comportamiento adicional.
+- La excepción base todavía no tiene comportamiento adicional.
 
-\- La lógica de negocio se implementará en una etapa posterior.
+- La lógica de negocio se implementará en una etapa posterior.
 
 
 
-\## Regla de organización
+## Regla de organización
 
 
 
