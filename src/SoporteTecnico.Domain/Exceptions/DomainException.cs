@@ -1,8 +1,12 @@
+
 namespace SoporteTecnico.Domain.Exceptions;
 
 /// <summary>
-/// Excepción base para incumplimientos de reglas del dominio.
+/// ExcepciÃ³n para incumplimientos generales de las reglas del dominio.
 /// </summary>
-public class DomainException : System.Exception
+public class DomainException : Exception
 {
+    public DomainException(string message) : base(message)
+    {
+    }
 }

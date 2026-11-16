@@ -1,3 +1,5 @@
+
+using SoporteTecnico.Api;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +14,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<SoporteDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SoporteTecnico")));
+        builder.Configuration.GetConnectionString("SoporteTecnico"),
+        sql => sql.MigrationsHistoryTable("__SoporteMigrationsHistory")));
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(
@@ -41,16 +44,12 @@ builder.Services
         {
             ValidateIssuer = true,
             ValidIssuer = jwtIssuer,
-
             ValidateAudience = true,
             ValidAudience = jwtAudience,
-
             ValidateLifetime = true,
-
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Convert.FromBase64String(jwtKey)),
-
             NameClaimType = ClaimTypes.Name,
             RoleClaimType = ClaimTypes.Role
         };
@@ -72,24 +71,29 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
+}
+
+if (app.Environment.IsDevelopment())
+{
+}
+
+if (app.Environment.IsDevelopment())
+{
     app.UseCors("FrontendDevelopment");
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/api/health", () =>
+app.MapGet("/api/health", () => Results.Ok(new
 {
-    return Results.Ok(new
-    {
-        status = "Healthy",
-        service = "SoporteTecnico.Api",
-        timestamp = DateTimeOffset.UtcNow
-    });
-});
+    status = "Healthy",
+    service = "SoporteTecnico.Api",
+    timestamp = DateTimeOffset.UtcNow
+}));
 
 app.MapGet("/api/categorias", async (
     SoporteDbContext db,
@@ -104,5 +108,5 @@ app.MapGet("/api/categorias", async (
     return Results.Ok(categorias);
 });
 
+app.MapAuthEndpoints();
 app.Run();
-

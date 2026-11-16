@@ -1,8 +1,41 @@
+
+using System.ComponentModel.DataAnnotations;
+using SoporteTecnico.Domain.Exceptions;
+
 namespace SoporteTecnico.Domain.Entities;
 
-/// <summary>
-/// Representa al usuario que solicita soporte t�cnico.
-/// </summary>
 public class Cliente
 {
+    public int Id { get; private set; }
+    public string Nombre { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+
+    private Cliente()
+    {
+    }
+
+    public Cliente(string nombre, string email)
+    {
+        ActualizarDatos(nombre, email);
+    }
+
+    public void ActualizarDatos(string nombre, string email)
+    {
+        if (string.IsNullOrWhiteSpace(nombre) || nombre.Trim().Length > 120)
+            throw new DomainException(
+                "El nombre debe tener entre 1 y 120 caracteres.");
+
+        if (string.IsNullOrWhiteSpace(email) || email.Trim().Length > 254)
+            throw new DomainException(
+                "El correo debe tener entre 1 y 254 caracteres.");
+
+        nombre = nombre.Trim();
+        email = email.Trim();
+
+        if (!new EmailAddressAttribute().IsValid(email))
+            throw new DomainException("El correo electrónico no es válido.");
+
+        Nombre = nombre;
+        Email = email;
+    }
 }
