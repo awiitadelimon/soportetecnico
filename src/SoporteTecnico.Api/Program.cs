@@ -1,14 +1,21 @@
-
-using SoporteTecnico.Api;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Security.Claims;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SoporteTecnico.Api;
+using SoporteTecnico.Application.Contracts;
+using SoporteTecnico.Application.Services;
 using SoporteTecnico.Infrastructure.Data;
+using SoporteTecnico.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddOpenApi();
 
@@ -16,6 +23,9 @@ builder.Services.AddDbContext<SoporteDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("SoporteTecnico"),
         sql => sql.MigrationsHistoryTable("__SoporteMigrationsHistory")));
+
+builder.Services.AddScoped<ISoporteRepository, SoporteRepository>();
+builder.Services.AddScoped<TicketService>();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(
@@ -61,7 +71,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendDevelopment", policy =>
     {
-        policy.WithOrigins("http://localhost:5000")
+        policy.WithOrigins(
+                "https://localhost:63369",
+                "http://localhost:63370",
+                "https://localhost:5001",
+                "http://localhost:5000")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -72,14 +86,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
-}
-
-if (app.Environment.IsDevelopment())
-{
-}
-
-if (app.Environment.IsDevelopment())
-{
     app.UseCors("FrontendDevelopment");
     app.MapOpenApi();
 }
@@ -95,18 +101,7 @@ app.MapGet("/api/health", () => Results.Ok(new
     timestamp = DateTimeOffset.UtcNow
 }));
 
-app.MapGet("/api/categorias", async (
-    SoporteDbContext db,
-    CancellationToken cancellationToken) =>
-{
-    var categorias = await db.Categorias
-        .AsNoTracking()
-        .OrderBy(c => c.Nombre)
-        .Select(c => new { c.Id, c.Nombre })
-        .ToListAsync(cancellationToken);
-
-    return Results.Ok(categorias);
-});
-
 app.MapAuthEndpoints();
+app.MapCatalogoEndpoints();
+app.MapTicketEndpoints();
 app.Run();

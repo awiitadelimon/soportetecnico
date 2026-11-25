@@ -1,13 +1,13 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using SoporteTecnico.Frontend.Models;
 
 namespace SoporteTecnico.Frontend.Services;
 
 public sealed class MockTf15Service : ITf15Service
 {
-    public const string CorreoAdministrador = "admin@tf15.example.invalid";
-    public const string CorreoGestor = "gestor@tf15.example.invalid";
-    public const string ClaveDemostracion = "TF15-Demo";
+    public const string CorreoAdministrador = "admin@soportetecnico.test";
+    public const string CorreoGestor = "gestor@soportetecnico.test";
+    public const string ClaveDemostracion = "Tf15Demo2026!";
 
     private const string Abierto = "Abierto";
     private const string Asignado = "Asignado";
@@ -17,42 +17,42 @@ public sealed class MockTf15Service : ITf15Service
     private readonly List<Categoria> categorias = [new(1, "Conectividad"), new(2, "Equipos"), new(3, "Aplicaciones")];
     private readonly List<Cliente> clientes =
     [
-        new(1, "María Reyes", "maria@example.invalid"),
-        new(2, "Luis Peña", "luis@example.invalid"),
-        new(3, "Sofía Díaz", "sofia@example.invalid")
+        new(1, "MarÃƒÂ­a Reyes", "maria@example.invalid"),
+        new(2, "Luis PeÃƒÂ±a", "luis@example.invalid"),
+        new(3, "SofÃƒÂ­a DÃƒÂ­az", "sofia@example.invalid")
     ];
     private readonly List<Tecnico> tecnicos =
     [
         new(1, "Ana Mora", "ana@soporte.example.invalid", true),
-        new(2, "Mateo Núñez", "mateo@soporte.example.invalid", true),
+        new(2, "Mateo NÃƒÂºÃƒÂ±ez", "mateo@soporte.example.invalid", true),
         new(3, "Elena Cruz", "elena@soporte.example.invalid", false)
     ];
     private readonly Dictionary<int, Ticket> tickets = new()
     {
-        [1] = new(new(1, 1, "María Reyes", 1, "Conectividad", 1, "Ana Mora", "Acceso a la red interna",
-            "Alta", Cerrado, Fecha(2, 13)), "El equipo perdió la conexión al cambiar de puesto.",
+        [1] = new(new(1, 1, "MarÃƒÂ­a Reyes", 1, "Conectividad", 1, "Ana Mora", "Acceso a la red interna",
+            "Alta", Cerrado, Fecha(2, 13)), "El equipo perdiÃƒÂ³ la conexiÃƒÂ³n al cambiar de puesto.",
             Fecha(2, 15), Fecha(2, 16),
             [
                 new(1, "Creado", "Ticket registrado.", "Mesa de ayuda", Fecha(2, 13), null),
-                new(2, Asignado, "Técnico asignado: Ana Mora.", "Mesa de ayuda", Fecha(2, 14), 1),
-                new(3, Resuelto, "Se sustituyó el cable de red y se verificó la conexión.", "Mesa de ayuda", Fecha(2, 15), null),
+                new(2, Asignado, "TÃƒÂ©cnico asignado: Ana Mora.", "Mesa de ayuda", Fecha(2, 14), 1),
+                new(3, Resuelto, "Se sustituyÃƒÂ³ el cable de red y se verificÃƒÂ³ la conexiÃƒÂ³n.", "Mesa de ayuda", Fecha(2, 15), null),
                 new(4, Cerrado, "Ticket cerrado.", "Mesa de ayuda", Fecha(2, 16), null)
             ]),
-        [2] = new(new(2, 2, "Luis Peña", 2, "Equipos", 2, "Mateo Núñez", "Impresora sin respuesta",
+        [2] = new(new(2, 2, "Luis PeÃƒÂ±a", 2, "Equipos", 2, "Mateo NÃƒÂºÃƒÂ±ez", "Impresora sin respuesta",
             "Media", Asignado, Fecha(3, 13)), "La impresora aparece desconectada en el equipo del cliente.", null, null,
             [
                 new(5, "Creado", "Ticket registrado.", "Mesa de ayuda", Fecha(3, 13), null),
-                new(6, Asignado, "Técnico asignado: Mateo Núñez.", "Mesa de ayuda", Fecha(3, 14), 2)
+                new(6, Asignado, "TÃƒÂ©cnico asignado: Mateo NÃƒÂºÃƒÂ±ez.", "Mesa de ayuda", Fecha(3, 14), 2)
             ]),
-        [3] = new(new(3, 3, "Sofía Díaz", 3, "Aplicaciones", null, null, "Error al abrir el portal",
+        [3] = new(new(3, 3, "SofÃƒÂ­a DÃƒÂ­az", 3, "Aplicaciones", null, null, "Error al abrir el portal",
             "Critica", Abierto, Fecha(4, 13)), "El portal interno muestra un error al abrir la pantalla de inicio.", null, null,
             [new(7, "Creado", "Ticket registrado.", "Mesa de ayuda", Fecha(4, 13), null)]),
-        [4] = new(new(4, 1, "María Reyes", 3, "Aplicaciones", 1, "Ana Mora", "Actualización de aplicación",
-            "Baja", Resuelto, Fecha(4, 14)), "La estación de trabajo usa una versión anterior.", Fecha(4, 16), null,
+        [4] = new(new(4, 1, "MarÃƒÂ­a Reyes", 3, "Aplicaciones", 1, "Ana Mora", "ActualizaciÃƒÂ³n de aplicaciÃƒÂ³n",
+            "Baja", Resuelto, Fecha(4, 14)), "La estaciÃƒÂ³n de trabajo usa una versiÃƒÂ³n anterior.", Fecha(4, 16), null,
             [
                 new(8, "Creado", "Ticket registrado.", "Mesa de ayuda", Fecha(4, 14), null),
-                new(9, Asignado, "Técnico asignado: Ana Mora.", "Mesa de ayuda", Fecha(4, 15), 1),
-                new(10, Resuelto, "Se instaló la versión autorizada y se comprobó el inicio.", "Mesa de ayuda", Fecha(4, 16), null)
+                new(9, Asignado, "TÃƒÂ©cnico asignado: Ana Mora.", "Mesa de ayuda", Fecha(4, 15), 1),
+                new(10, Resuelto, "Se instalÃƒÂ³ la versiÃƒÂ³n autorizada y se comprobÃƒÂ³ el inicio.", "Mesa de ayuda", Fecha(4, 16), null)
             ])
     };
 
@@ -69,7 +69,7 @@ public sealed class MockTf15Service : ITf15Service
             _ => null
         };
         if (rol is null || input.Contrasena != ClaveDemostracion)
-            throw new InvalidOperationException("Correo o contraseña incorrectos.");
+            throw new InvalidOperationException("Correo o contraseÃƒÂ±a incorrectos.");
 
         SesionActual = new Sesion(string.Empty, rol + " de prueba", [rol]);
         return Task.CompletedTask;
@@ -93,7 +93,7 @@ public sealed class MockTf15Service : ITf15Service
         var anterior = id is int value ? BuscarCategoria(value) : null;
         var nombre = Texto(input.Nombre, 100, "El nombre");
         if (categorias.Any(c => c.Id != id && c.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException("Ya existe una categoría con ese nombre.");
+            throw new InvalidOperationException("Ya existe una categorÃƒÂ­a con ese nombre.");
 
         var categoria = new Categoria(anterior?.Id ?? siguienteCategoria++, nombre);
         Guardar(categorias, anterior, categoria);
@@ -104,7 +104,7 @@ public sealed class MockTf15Service : ITf15Service
     {
         var categoria = BuscarCategoria(id);
         if (tickets.Values.Any(t => t.Datos.CategoriaId == id))
-            throw new InvalidOperationException("La categoría tiene tickets asociados.");
+            throw new InvalidOperationException("La categorÃƒÂ­a tiene tickets asociados.");
         categorias.Remove(categoria);
         return Task.CompletedTask;
     }
@@ -137,9 +137,9 @@ public sealed class MockTf15Service : ITf15Service
         var nombre = Texto(input.Nombre, 120, "El nombre");
         var correo = Correo(input.Email);
         if (tecnicos.Any(t => t.Id != id && t.Email.Equals(correo, StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException("Ya existe un técnico con ese correo.");
+            throw new InvalidOperationException("Ya existe un tÃƒÂ©cnico con ese correo.");
         if (!input.Activo && tickets.Values.Any(t => t.Datos.TecnicoId == id && t.Datos.Estado == Asignado))
-            throw new InvalidOperationException("El técnico tiene tickets pendientes de resolver.");
+            throw new InvalidOperationException("El tÃƒÂ©cnico tiene tickets pendientes de resolver.");
 
         var tecnico = new Tecnico(anterior?.Id ?? siguienteTecnico++, nombre, correo, input.Activo);
         Guardar(tecnicos, anterior, tecnico);
@@ -150,7 +150,7 @@ public sealed class MockTf15Service : ITf15Service
     {
         var tecnico = BuscarTecnico(id);
         if (tickets.Values.Any(t => t.Datos.TecnicoId == id || t.Seguimientos.Any(s => s.TecnicoId == id)))
-            throw new InvalidOperationException("El técnico tiene historial de asignaciones.");
+            throw new InvalidOperationException("El tÃƒÂ©cnico tiene historial de asignaciones.");
         tecnicos.Remove(tecnico);
         return Task.CompletedTask;
     }
@@ -160,9 +160,9 @@ public sealed class MockTf15Service : ITf15Service
         var cliente = BuscarCliente(input.ClienteId);
         var categoria = BuscarCategoria(input.CategoriaId);
         var asunto = Texto(input.Asunto, 150, "El asunto");
-        var descripcion = Texto(input.Descripcion, 1000, "La descripción");
+        var descripcion = Texto(input.Descripcion, 1000, "La descripciÃƒÂ³n");
         if (!Prioridades.Todas.Contains(input.Prioridad))
-            throw new InvalidOperationException("Seleccione una prioridad válida.");
+            throw new InvalidOperationException("Seleccione una prioridad vÃƒÂ¡lida.");
 
         var ahora = DateTimeOffset.UtcNow;
         var datos = new TicketResumen(siguienteTicket++, cliente.Id, cliente.Nombre, categoria.Id, categoria.Nombre,
@@ -175,13 +175,13 @@ public sealed class MockTf15Service : ITf15Service
         var ticket = BuscarEditable(id);
         var tecnico = BuscarTecnico(input.TecnicoId);
         if (!tecnico.Activo)
-            throw new InvalidOperationException("Seleccione un técnico activo.");
+            throw new InvalidOperationException("Seleccione un tÃƒÂ©cnico activo.");
         if (ticket.Datos.TecnicoId == tecnico.Id)
-            throw new InvalidOperationException("El ticket ya está asignado a ese técnico.");
+            throw new InvalidOperationException("El ticket ya estÃƒÂ¡ asignado a ese tÃƒÂ©cnico.");
 
         var tipo = ticket.Datos.Estado == Abierto ? Asignado : "Reasignado";
         var datos = ticket.Datos with { Estado = Asignado, TecnicoId = tecnico.Id, TecnicoNombre = tecnico.Nombre };
-        return Registrar(ticket with { Datos = datos }, tipo, $"Técnico asignado: {tecnico.Nombre}.", Momento(ticket), tecnico.Id);
+        return Registrar(ticket with { Datos = datos }, tipo, $"TÃƒÂ©cnico asignado: {tecnico.Nombre}.", Momento(ticket), tecnico.Id);
     }
 
     public Task<Ticket> AnotarAsync(int id, NotaInput input)
@@ -195,7 +195,7 @@ public sealed class MockTf15Service : ITf15Service
         var ticket = BuscarTicket(id);
         if (ticket.Datos.Estado != Asignado)
             throw new InvalidOperationException("Solo se resuelve un ticket asignado.");
-        var solucion = Texto(input.Solucion, 1000, "La solución");
+        var solucion = Texto(input.Solucion, 1000, "La soluciÃƒÂ³n");
         var ahora = Momento(ticket);
         return Registrar(ticket with { Datos = ticket.Datos with { Estado = Resuelto }, ResueltoUtc = ahora },
             Resuelto, solucion, ahora);
@@ -213,7 +213,7 @@ public sealed class MockTf15Service : ITf15Service
 
     private Task<Ticket> Registrar(Ticket ticket, string tipo, string detalle, DateTimeOffset fecha, int? tecnicoId = null)
     {
-        var autor = SesionActual?.Nombre ?? throw new InvalidOperationException("Inicie sesión para registrar el seguimiento.");
+        var autor = SesionActual?.Nombre ?? throw new InvalidOperationException("Inicie sesiÃƒÂ³n para registrar el seguimiento.");
         var evento = new Seguimiento(siguienteSeguimiento++, tipo, detalle, autor, fecha, tecnicoId);
         var actual = ticket with { Seguimientos = [.. ticket.Seguimientos, evento] };
         tickets[actual.Datos.Id] = actual;
@@ -240,13 +240,13 @@ public sealed class MockTf15Service : ITf15Service
     }
 
     private Ticket BuscarTicket(int id) => tickets.TryGetValue(id, out var ticket)
-        ? ticket : throw new InvalidOperationException("No se encontró el ticket.");
+        ? ticket : throw new InvalidOperationException("No se encontrÃƒÂ³ el ticket.");
     private Cliente BuscarCliente(int id) => clientes.Find(c => c.Id == id)
-        ?? throw new InvalidOperationException("No se encontró el cliente.");
+        ?? throw new InvalidOperationException("No se encontrÃƒÂ³ el cliente.");
     private Tecnico BuscarTecnico(int id) => tecnicos.Find(t => t.Id == id)
-        ?? throw new InvalidOperationException("No se encontró el técnico.");
+        ?? throw new InvalidOperationException("No se encontrÃƒÂ³ el tÃƒÂ©cnico.");
     private Categoria BuscarCategoria(int id) => categorias.Find(c => c.Id == id)
-        ?? throw new InvalidOperationException("No se encontró la categoría.");
+        ?? throw new InvalidOperationException("No se encontrÃƒÂ³ la categorÃƒÂ­a.");
 
     private static DateTimeOffset Fecha(int dia, int hora) => new(2026, 11, dia, hora, 0, 0, TimeSpan.Zero);
 
@@ -269,7 +269,7 @@ public sealed class MockTf15Service : ITf15Service
     {
         var valor = Texto(entrada, 254, "El correo");
         if (!new EmailAddressAttribute().IsValid(valor))
-            throw new InvalidOperationException("Indique un correo válido.");
+            throw new InvalidOperationException("Indique un correo vÃƒÂ¡lido.");
         return valor;
     }
 

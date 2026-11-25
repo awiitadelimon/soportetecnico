@@ -1,4 +1,4 @@
-
+﻿
 
 
 using SoporteTecnico.Domain.Enums;
@@ -28,14 +28,14 @@ public class Ticket
     public Ticket(int clienteId, int categoriaId, string asunto, string descripcion,
         Prioridad prioridad, string autor, DateTimeOffset fechaUtc)
     {
-        if (clienteId <= 0) throw new DomainException("El cliente no es válido.");
-        if (categoriaId <= 0) throw new DomainException("La categoría no es válida.");
+        if (clienteId <= 0) throw new DomainException("El cliente no es vÃ¡lido.");
+        if (categoriaId <= 0) throw new DomainException("La categorÃ­a no es vÃ¡lida.");
         if (string.IsNullOrWhiteSpace(asunto) || asunto.Trim().Length > 150)
             throw new DomainException("El asunto debe tener entre 1 y 150 caracteres.");
         if (string.IsNullOrWhiteSpace(descripcion) || descripcion.Trim().Length > 1000)
-            throw new DomainException("La descripción debe tener entre 1 y 1000 caracteres.");
-        if (!Enum.IsDefined(prioridad)) throw new DomainException("La prioridad no es válida.");
-        if (fechaUtc == default) throw new DomainException("La fecha de creación no es válida.");
+            throw new DomainException("La descripciÃ³n debe tener entre 1 y 1000 caracteres.");
+        if (!Enum.IsDefined(prioridad)) throw new DomainException("La prioridad no es vÃ¡lida.");
+        if (fechaUtc == default) throw new DomainException("La fecha de creaciÃ³n no es vÃ¡lida.");
 
         ClienteId = clienteId;
         CategoriaId = categoriaId;
@@ -50,12 +50,12 @@ public class Ticket
 
     public void Asignar(Tecnico tecnico, string autor, DateTimeOffset fechaUtc)
     {
-        if (tecnico is null) throw new DomainException("El técnico es obligatorio.");
-        if (!tecnico.Activo) throw new DomainException("No se puede asignar un técnico inactivo.");
+        if (tecnico is null) throw new DomainException("El tÃ©cnico es obligatorio.");
+        if (!tecnico.Activo) throw new DomainException("No se puede asignar un tÃ©cnico inactivo.");
         if (Estado != EstadoTicket.Abierto && Estado != EstadoTicket.Asignado)
             throw new TicketStateException("Solo se pueden asignar tickets abiertos o ya asignados.");
         if (TecnicoId == tecnico.Id)
-            throw new DomainException("El ticket ya está asignado a ese técnico.");
+            throw new DomainException("El ticket ya estÃ¡ asignado a ese tÃ©cnico.");
 
         DateTimeOffset fecha = ValidarFecha(fechaUtc);
         TipoSeguimiento tipo = Estado == EstadoTicket.Abierto
@@ -63,7 +63,7 @@ public class Ticket
 
         RegistrarSeguimiento(tipo,
             tipo == TipoSeguimiento.Asignado
-                ? "Ticket asignado a un técnico." : "Ticket reasignado a otro técnico.",
+                ? "Ticket asignado a un tÃ©cnico." : "Ticket reasignado a otro tÃ©cnico.",
             autor, fecha, tecnico.Id);
 
         TecnicoId = tecnico.Id;
@@ -79,23 +79,24 @@ public class Ticket
         RegistrarSeguimiento(TipoSeguimiento.Nota, detalle, autor, fecha, TecnicoId);
     }
 
-    public void Resolver(string solucion, string autor, DateTimeOffset fechaUtc)
-    {
-        if (Estado != EstadoTicket.Asignado)
-            throw new TicketStateException("Solo se pueden resolver tickets asignados.");
+   public void Resolver(string solucion, string autor, DateTimeOffset fechaUtc)
+{
+    if (Estado != EstadoTicket.Asignado)
+        throw new TicketStateException("Solo se pueden resolver tickets asignados.");
 
-        DateTimeOffset fecha = ValidarFecha(fechaUtc);
+    DateTimeOffset fecha = ValidarFecha(fechaUtc);
 
-        RegistrarSeguimiento(
-            TipoSeguimiento.Resuelto,
-            solucion,
-            autor,
-            fecha,
-            TecnicoId);
+    RegistrarSeguimiento(
+        TipoSeguimiento.Resuelto,
+        solucion,
+        autor,
+        fecha,
+        TecnicoId);
 
-        Estado = EstadoTicket.Resuelto;
-        ResueltoUtc = fecha;
-    }
+    Estado = EstadoTicket.Resuelto;
+    ResueltoUtc = fecha;
+}
+
 
     public void Cerrar(string autor, DateTimeOffset fechaUtc)
     {
@@ -110,14 +111,14 @@ public class Ticket
 
     private DateTimeOffset ValidarFecha(DateTimeOffset fechaUtc)
     {
-        if (fechaUtc == default) throw new DomainException("La fecha no es válida.");
+        if (fechaUtc == default) throw new DomainException("La fecha no es vÃ¡lida.");
 
         DateTimeOffset fecha = fechaUtc.ToUniversalTime();
         DateTimeOffset ultimaFecha = _seguimientos.Count > 0
             ? _seguimientos[^1].FechaUtc : CreadoUtc;
 
         if (fecha < ultimaFecha)
-            throw new DomainException("La fecha no puede ser anterior al último seguimiento.");
+            throw new DomainException("La fecha no puede ser anterior al Ãºltimo seguimiento.");
 
         return fecha;
     }

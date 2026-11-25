@@ -145,11 +145,12 @@ public class SoporteDbContext(DbContextOptions<SoporteDbContext> options)
                 .UseCollation("Latin1_General_100_BIN2")
                 .IsRequired();
 
-            entity.Property(t => t.Estado)
+                entity.Property(t => t.Estado)
                 .HasConversion<string>()
                 .HasColumnType("varchar(12)")
                 .UseCollation("Latin1_General_100_BIN2")
                 .HasDefaultValueSql("('Abierto')")
+                .HasSentinel((EstadoTicket)(-1))
                 .IsRequired();
 
             entity.Property(t => t.CreadoUtc)
@@ -199,10 +200,12 @@ public class SoporteDbContext(DbContextOptions<SoporteDbContext> options)
                 table.HasCheckConstraint(
                     "CK_Seguimientos_TipoTecnico",
                     """
-                    ([Tipo] IN ('Asignado', 'Reasignado') AND [TecnicoId] IS NOT NULL)
+                    ([Tipo] = 'Creado' AND [TecnicoId] IS NULL)
                     OR
-                    ([Tipo] IN ('Creado', 'Nota', 'Resuelto', 'Cerrado')
-                        AND [TecnicoId] IS NULL)
+                    ([Tipo] IN ('Asignado', 'Reasignado', 'Resuelto', 'Cerrado')
+                        AND [TecnicoId] IS NOT NULL)
+                    OR
+                    ([Tipo] = 'Nota')
                     """);
 
                 table.HasCheckConstraint(

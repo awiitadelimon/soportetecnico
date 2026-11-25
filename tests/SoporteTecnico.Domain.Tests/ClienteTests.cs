@@ -1,52 +1,49 @@
 ﻿
-using System.ComponentModel.DataAnnotations;
+using SoporteTecnico.Domain.Entities;
 using SoporteTecnico.Domain.Exceptions;
 
-namespace SoporteTecnico.Domain.Entities;
+namespace SoporteTecnico.Domain.Tests;
 
-public class Cliente
+public class ClienteTests
 {
-    public int Id { get; private set; }
-
-    public string Nombre { get; private set; } = string.Empty;
-
-    public string Email { get; private set; } = string.Empty;
-
-    private Cliente()
+    [Fact]
+    public void Constructor_DatosValidos_CreaCliente()
     {
+        var cliente = new Cliente("María Reyes", "maria@gmail.com");
+
+        Assert.Equal("María Reyes", cliente.Nombre);
+        Assert.Equal("maria@gmail.com", cliente.Email);
     }
 
-    public Cliente(string nombre, string email)
+    [Fact]
+    public void Constructor_NombreVacio_LanzaExcepcion()
     {
-        ActualizarDatos(nombre, email);
+        Assert.Throws<DomainException>(
+            () => new Cliente("", "maria@gmail.com"));
     }
 
-    public void ActualizarDatos(string nombre, string email)
+    [Fact]
+    public void Constructor_EmailVacio_LanzaExcepcion()
     {
-        if (string.IsNullOrWhiteSpace(nombre))
-            throw new DomainException(
-                "El nombre debe tener entre 1 y 120 caracteres.");
+        Assert.Throws<DomainException>(
+            () => new Cliente("María Reyes", ""));
+    }
 
-        if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException(
-                "El correo debe tener entre 1 y 254 caracteres.");
+    [Fact]
+    public void Constructor_EmailInvalido_LanzaExcepcion()
+    {
+        Assert.Throws<DomainException>(
+            () => new Cliente("María Reyes", "correo-invalido"));
+    }
 
-        nombre = nombre.Trim();
-        email = email.Trim();
+    [Fact]
+    public void ActualizarDatos_DatosValidos_ActualizaCliente()
+    {
+        var cliente = new Cliente("María Reyes", "maria@gmail.com");
 
-        if (nombre.Length > 120)
-            throw new DomainException(
-                "El nombre debe tener entre 1 y 120 caracteres.");
+        cliente.ActualizarDatos("Luis Peña", "luis@gmail.com");
 
-        if (email.Length > 254)
-            throw new DomainException(
-                "El correo debe tener entre 1 y 254 caracteres.");
-
-        if (!new EmailAddressAttribute().IsValid(email))
-            throw new DomainException(
-                "El correo electrónico no es válido.");
-
-        Nombre = nombre;
-        Email = email;
+        Assert.Equal("Luis Peña", cliente.Nombre);
+        Assert.Equal("luis@gmail.com", cliente.Email);
     }
 }

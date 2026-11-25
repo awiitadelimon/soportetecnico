@@ -133,7 +133,7 @@ namespace SoporteTecnico.Infrastructure.Data.Migrations
                         {
                             t.HasCheckConstraint("CK_Seguimientos_Texto", "LEN(TRIM([Detalle])) > 0 AND LEN(TRIM([Autor])) > 0");
 
-                            t.HasCheckConstraint("CK_Seguimientos_TipoTecnico", "([Tipo] IN ('Asignado', 'Reasignado') AND [TecnicoId] IS NOT NULL)\nOR\n([Tipo] IN ('Creado', 'Nota', 'Resuelto', 'Cerrado')\n    AND [TecnicoId] IS NULL)");
+                            t.HasCheckConstraint("CK_Seguimientos_TipoTecnico", "([Tipo] = 'Creado' AND [TecnicoId] IS NULL)\nOR\n([Tipo] IN ('Asignado', 'Reasignado', 'Resuelto', 'Cerrado')\n    AND [TecnicoId] IS NOT NULL)\nOR\n([Tipo] = 'Nota')");
                         });
                 });
 
